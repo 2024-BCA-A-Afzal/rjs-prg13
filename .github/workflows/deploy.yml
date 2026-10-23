@@ -1,63 +1,46 @@
-name: Deploy React App to GitHub Pages
+name: Node.js CI
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-        
+          node-version: '24'
+
+      - name: Check Node.js and npm Versions
+        run: |
+          node --version
+          npm --version
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found. Skipping dependency installation."
+          fi
 
-      - name: Build React Application
-        run: npm run build
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Website
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./build
-
-  deploy:
-
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    permissions:
-      pages: write
-      id-token: write
-
-    steps:
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Build Project
+        run: |
+          if [ -f package.json ]; then
+            npm run build --if-present
+          else
+            echo "No package.json found. Skipping build."
+          fi
