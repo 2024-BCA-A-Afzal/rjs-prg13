@@ -1,0 +1,21 @@
+{
+  "name": "rjs-prg13",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "homepage": "https://2024-BCA-A-Afzal.github.io/rjs-prg13/",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {}
+}
