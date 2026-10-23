@@ -1,3 +1,4 @@
+```yaml
 name: Deploy Website
 
 on:
@@ -30,25 +31,21 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          elif [ -f package.json ]; then
-            npm install
-          fi
+          npm install
 
       - name: Build Project
         run: |
-          if [ -f package.json ]; then
-            npm run build --if-present
-          fi
+          npm run build --if-present
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ hashFiles('package.json') != '' && 'dist' || '.' }}
+          path: .
 
   deploy:
     environment:
