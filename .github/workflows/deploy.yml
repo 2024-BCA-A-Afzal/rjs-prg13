@@ -1,13 +1,19 @@
-name: Node.js CI
+name: Deploy Website
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,25 +28,37 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Check Node.js and npm Versions
-        run: |
-          node --version
-          npm --version
-
       - name: Install Dependencies
         run: |
           if [ -f package-lock.json ]; then
             npm ci
           elif [ -f package.json ]; then
             npm install
-          else
-            echo "No package.json found. Skipping dependency installation."
           fi
 
       - name: Build Project
         run: |
           if [ -f package.json ]; then
             npm run build --if-present
-          else
-            echo "No package.json found. Skipping build."
           fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ hashFiles('package.json') != '' && 'dist' || '.' }}
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
